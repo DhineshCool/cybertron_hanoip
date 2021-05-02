@@ -222,7 +222,6 @@ static void sugov_update_commit(struct sugov_policy *sg_policy, u64 time,
 				unsigned int next_freq)
 {
 	struct cpufreq_policy *policy = sg_policy->policy;
-	unsigned int cpu;
 
 	if (sg_policy->next_freq == next_freq)
 		return;

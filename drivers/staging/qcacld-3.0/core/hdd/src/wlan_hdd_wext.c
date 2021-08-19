@@ -3267,6 +3267,7 @@ static void hdd_display_stats_help(void)
 int hdd_wlan_dump_stats(struct hdd_adapter *adapter, int value)
 {
 	int ret = 0;
+#ifdef WLAN_DEBUG
 	QDF_STATUS status;
 	struct hdd_context *hdd_ctx = WLAN_HDD_GET_CTX(adapter);
 
@@ -3309,6 +3310,7 @@ int hdd_wlan_dump_stats(struct hdd_adapter *adapter, int value)
 		}
 		break;
 	}
+#endif
 	return ret;
 }
 

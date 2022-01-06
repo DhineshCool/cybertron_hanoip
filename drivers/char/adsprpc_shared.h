@@ -32,8 +32,6 @@
 #define FASTRPC_IOCTL_INVOKE_CRC _IOWR('R', 11, struct fastrpc_ioctl_invoke_crc)
 #define FASTRPC_IOCTL_CONTROL   _IOWR('R', 12, struct fastrpc_ioctl_control)
 #define FASTRPC_IOCTL_MUNMAP_FD _IOWR('R', 13, struct fastrpc_ioctl_munmap_fd)
-#define FASTRPC_IOCTL_GET_DSP_INFO \
-			_IOWR('R', 16, struct fastrpc_ioctl_dsp_capabilities)
 
 #define FASTRPC_GLINK_GUID "fastrpcglink-apps-dsp"
 #define FASTRPC_SMD_GUID "fastrpcsmd-apps-dsp"
@@ -248,6 +246,7 @@ enum fastrpc_control_type {
 	FASTRPC_CONTROL_SMMU		=	2,
 	FASTRPC_CONTROL_KALLOC		=	3,
 	FASTRPC_CONTROL_WAKELOCK	=	4,
+	FASTRPC_CONTROL_PM			=	5,
 };
 
 struct fastrpc_ctrl_latency {
@@ -260,7 +259,11 @@ struct fastrpc_ctrl_kalloc {
 };
 
 struct fastrpc_ctrl_wakelock {
-	uint32_t enable;	/* wakelock control enable */
+	uint32_t enable;	/* timeout(in ms) for PM to keep system awake */
+};
+
+struct fastrpc_ctrl_pm {
+	uint32_t timeout;	/* wakelock control enable */
 };
 
 struct fastrpc_ioctl_control {
@@ -269,13 +272,8 @@ struct fastrpc_ioctl_control {
 		struct fastrpc_ctrl_latency lp;
 		struct fastrpc_ctrl_kalloc kalloc;
 		struct fastrpc_ctrl_wakelock wp;
+		struct fastrpc_ctrl_pm pm;
 	};
-};
-
-#define FASTRPC_MAX_DSP_ATTRIBUTES            (7)
-struct fastrpc_ioctl_dsp_capabilities {
-	uint32_t domain;	//! DSP domain to query capabilities
-	uint32_t dsp_attributes[FASTRPC_MAX_DSP_ATTRIBUTES];
 };
 
 struct smq_null_invoke {

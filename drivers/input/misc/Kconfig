@@ -184,6 +184,15 @@ config INPUT_QPNP_POWER_ON
 	  reporting the change in status of the KPDPWR_N line (connected to the
 	  power-key) as well as reset features.
 
+config INPUT_QPNP_POWER_ON_MMI
+	tristate "Moto QPNP PMIC Power-on support"
+	depends on SPMI
+	help
+	  This option enables device driver support for the power-on
+	  functionality of Qualcomm Technologies, Inc. PNP PMICs.  It supports
+	  reporting the change in status of the KPDPWR_N line (connected to the
+	  power-key) as well as reset features.
+
 config INPUT_QTI_HAPTICS
 	tristate "Haptics support for QTI PMIC"
 	depends on MFD_SPMI_PMIC
@@ -888,5 +897,30 @@ config INPUT_HISI_POWERKEY
 
 	  To compile this driver as a module, choose M here: the
 	  module will be called hisi_powerkey.
+
+config INPUT_STMVL53L1
+	tristate "STM VL53L1 Proximity support"
+	depends on INPUT && I2C
+	help
+	  Say Y here if you want to use STMicroelectronics's proximity sensor
+	  through I2C interface.
+
+	  To compile this driver as a module, choose M here: the
+	  module will be called stmvl53l1.
+
+config STMVL53L1_NETLINK_PROTOCOL
+	int "STM VL53L1 netlink protocol"
+	range 0 32
+	default 8
+	help
+	  This option sets the netlink protocol used for netlink creation
+	  in STMVL53L1 module.
+
+config STMVL53L1_USE_CAMERA_CCI
+	bool "STM VL53L1 use camera cci interface"
+	depends on I2C
+	default y
+	help
+	  Say Y if camera cci interface is used in STMVL53L1 module.
 
 endif

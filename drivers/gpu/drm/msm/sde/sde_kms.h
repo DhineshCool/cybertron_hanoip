@@ -123,7 +123,7 @@
 #define SDE_KMS_OPS_PREPARE_PLANE_FB		BIT(3)
 
 /* ESD status check interval in miliseconds */
-#define STATUS_CHECK_INTERVAL_MS 5000
+#define STATUS_CHECK_INTERVAL_MS 8000
 
 /**
  * enum sde_kms_smmu_state:	smmu state
@@ -679,6 +679,13 @@ int sde_kms_handle_recovery(struct drm_encoder *encoder);
  * @crtc: crtc that splash resource to be released from
  */
 void sde_kms_release_splash_resource(struct sde_kms *sde_kms,
+		struct drm_crtc *crtc);
+/**
+ * sde_kms_trigger_early_wakeup - trigger early wake up
+ * @sde_kms: pointer to sde_kms structure
+ * @crtc: pointer to drm_crtc structure
+ */
+void sde_kms_trigger_early_wakeup(struct sde_kms *sde_kms,
 		struct drm_crtc *crtc);
 
 #endif /* __sde_kms_H__ */

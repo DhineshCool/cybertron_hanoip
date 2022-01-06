@@ -361,7 +361,6 @@ struct ufs_qcom_host {
 	struct ufs_vreg *vddp_ref_clk;
 	struct ufs_vreg *vccq_parent;
 	bool work_pending;
-	bool is_phy_pwr_on;
 };
 
 static inline u32
@@ -401,5 +400,8 @@ static inline bool ufs_qcom_cap_svs2(struct ufs_qcom_host *host)
 {
 	return !!(host->caps & UFS_QCOM_CAP_SVS2);
 }
+
+void ufs_qcom_print_phy_state(struct ufs_hba *hba);
+bool ufs_qcom_check_phy_state(struct ufs_hba *hba);
 
 #endif /* UFS_QCOM_H_ */

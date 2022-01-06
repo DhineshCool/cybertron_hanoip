@@ -103,6 +103,7 @@ enum msm_mdp_plane_property {
 
 	/* range properties */
 	PLANE_PROP_ZPOS = PLANE_PROP_BLOBCOUNT,
+	PLANE_PROP_FOD,
 	PLANE_PROP_ALPHA,
 	PLANE_PROP_COLOR_FILL,
 	PLANE_PROP_H_DECIMATE,
@@ -200,11 +201,16 @@ enum msm_mdp_conn_property {
 	CONNECTOR_PROP_FB_TRANSLATION_MODE,
 	CONNECTOR_PROP_QSYNC_MODE,
 
+	/* MOT feature panel*/
+	CONNECTOR_PROP_HBM,
+	CONNECTOR_PROP_CABC,
+	CONNECTOR_PROP_ACL,
 	/* total # of properties */
 	CONNECTOR_PROP_COUNT
 };
 
 #define MAX_H_TILES_PER_DISPLAY 2
+#define MSM_DISP_NAME_LEN_MAX  128
 
 /**
  * enum msm_display_compression_type - compression method used for pixel stream
@@ -305,6 +311,26 @@ struct msm_roi_caps {
 	bool merge_rois;
 	uint32_t num_roi;
 	struct msm_roi_alignment align;
+};
+
+enum msm_param_state {
+	PARAM_STATE_OFF = 0,
+	PARAM_STATE_ON,
+	PARAM_STATE_NUM,
+	PARAM_STATE_DISABLE = 0xFFFF,
+};
+
+enum msm_param_id {
+	PARAM_HBM_ID = 0,
+	PARAM_CABC_ID,
+	PARAM_ACL_ID,
+	PARAM_ID_NUM
+};
+
+struct msm_param_info {
+	enum msm_param_id param_idx;
+	enum msm_mdp_conn_property param_conn_idx;
+	int value;
 };
 
 /**
@@ -508,6 +534,11 @@ struct msm_display_info {
 
 	bool is_connected;
 
+	uint64_t panel_id;
+	uint64_t panel_ver;
+	char panel_name[MSM_DISP_NAME_LEN_MAX];
+	char panel_supplier[MSM_DISP_NAME_LEN_MAX];
+
 	unsigned int width_mm;
 	unsigned int height_mm;
 
@@ -577,6 +608,15 @@ struct msm_drm_thread {
 	struct task_struct *thread;
 	unsigned int crtc_id;
 	struct kthread_worker worker;
+};
+
+struct msm_idle {
+	u32 timeout_ms;
+	u32 encoder_mask;
+	u32 active_mask;
+
+	spinlock_t lock;
+	struct delayed_work work;
 };
 
 struct msm_drm_private {
@@ -687,6 +727,8 @@ struct msm_drm_private {
 
 	/* update the flag when msm driver receives shutdown notification */
 	bool shutdown_in_progress;
+
+	struct msm_idle idle;
 };
 
 /* get struct msm_kms * from drm_device * */
@@ -937,6 +979,7 @@ static inline int msm_dsi_modeset_init(struct msm_dsi *msm_dsi,
 void __init msm_mdp_register(void);
 void __exit msm_mdp_unregister(void);
 
+void msm_idle_set_state(struct drm_encoder *encoder, bool active);
 #ifdef CONFIG_DEBUG_FS
 void msm_gem_describe(struct drm_gem_object *obj, struct seq_file *m);
 void msm_gem_describe_objects(struct list_head *list, struct seq_file *m);

@@ -2395,6 +2395,8 @@ static int sde_encoder_resource_control(struct drm_encoder *drm_enc,
 			SDE_DEBUG_ENC(sde_enc, "sw_event:%d, work cancelled\n",
 					sw_event);
 
+		msm_idle_set_state(drm_enc, true);
+
 		mutex_lock(&sde_enc->rc_lock);
 
 		/* return if the resource control is already in ON state */
@@ -2498,6 +2500,8 @@ static int sde_encoder_resource_control(struct drm_encoder *drm_enc,
 			idle_pc_duration = IDLE_SHORT_TIMEOUT;
 		else
 			idle_pc_duration = IDLE_POWERCOLLAPSE_DURATION;
+
+		msm_idle_set_state(drm_enc, false);
 
 		if (!autorefresh_enabled)
 			kthread_mod_delayed_work(
@@ -4496,6 +4500,29 @@ exit:
 	_sde_encoder_power_enable(sde_enc, false);
 }
 
+int sde_encoder_poll_rd_frame_counts(struct drm_encoder *drm_enc)
+{
+	struct sde_encoder_virt *sde_enc;
+	int rd_frame_count;
+
+	if (!drm_enc) {
+		SDE_ERROR("invalid encoder\n");
+		return -EINVAL;
+	}
+
+	sde_enc = to_sde_encoder_virt(drm_enc);
+	if (!sde_enc->cur_master ||
+		!sde_enc->cur_master->ops.get_rd_frame_count) {
+		SDE_DEBUG_ENC(sde_enc, "can't get master rd_frame_count\n");
+		return -EINVAL;
+	}
+
+	rd_frame_count = sde_enc->cur_master->ops.get_rd_frame_count(
+					sde_enc->cur_master);
+
+	return rd_frame_count;
+}
+
 int sde_encoder_poll_line_counts(struct drm_encoder *drm_enc)
 {
 	static const uint64_t timeout_us = 50000;
@@ -4799,6 +4826,48 @@ static int _sde_encoder_reset_ctl_hw(struct drm_encoder *drm_enc)
 
 	SDE_ATRACE_END("encoder_release_lm");
 	return rc;
+}
+
+
+int sde_encoder_set_pp_config_height(struct drm_encoder *drm_enc, bool enable,
+					u32 *prev_height)
+{
+	int ret = 0;
+	struct sde_encoder_virt *sde_enc_virt;
+	struct drm_display_mode *mode;
+	struct sde_encoder_phys *phys;
+
+	sde_enc_virt = to_sde_encoder_virt(drm_enc);
+	if (!sde_enc_virt->cur_master) {
+		ret = -EINVAL;
+		SDE_ERROR("Invalid sde_encoder_virt\n");
+		goto end;
+	}
+
+	mode = &sde_enc_virt->cur_master->cached_mode;
+	if (!mode) {
+		ret = -EINVAL;
+		SDE_ERROR("Invalid drm_display_mode\n");
+		goto end;
+	}
+
+	/* TODO.. how to handle with 2 DSIs for split display */
+	phys = sde_enc_virt->phys_encs[0];
+
+	/* The TE max height in MDP is being set to a max value of
+	 * 0xFFF0. Since this is such a large number, when TE is
+	 * disabled from the panel, we'll start to get constant timeout
+	 * errors and get 1 FPS.  To prevent this from happening, set
+	 * the height to display height * 2.  This will just cause our
+	 * FPS to drop to 30 FPS, and prevent timeout errors.
+	 */
+	if (phys->hw_pp->ops.change_config_height)
+		ret = phys->hw_pp->ops.change_config_height(
+					phys->hw_pp, enable,
+					mode->vdisplay * 2, prev_height);
+
+end:
+	return ret;
 }
 
 void sde_encoder_kickoff(struct drm_encoder *drm_enc, bool is_error)
@@ -5920,4 +5989,30 @@ void sde_encoder_recovery_events_handler(struct drm_encoder *encoder,
 
 	sde_enc = to_sde_encoder_virt(encoder);
 	sde_enc->recovery_events_enabled = enabled;
+}
+
+void sde_encoder_trigger_early_wakeup(struct drm_encoder *drm_enc)
+{
+	struct sde_encoder_virt *sde_enc = NULL;
+	struct msm_drm_private *priv = NULL;
+
+	priv = drm_enc->dev->dev_private;
+	sde_enc = to_sde_encoder_virt(drm_enc);
+	if (!sde_enc->crtc || (sde_enc->crtc->index
+			>= ARRAY_SIZE(priv->disp_thread))) {
+		SDE_DEBUG_ENC(sde_enc,
+			"invalid cached CRTC: %d or crtc index: %d\n",
+			sde_enc->crtc == NULL,
+			sde_enc->crtc ? sde_enc->crtc->index : -EINVAL);
+		return;
+	}
+
+	SDE_ATRACE_BEGIN("sde_encoder_resource_control");
+	if (sde_enc->rc_state == SDE_ENC_RC_STATE_IDLE) {
+		sde_encoder_resource_control(drm_enc,
+					     SDE_ENC_RC_EVENT_EARLY_WAKEUP);
+
+	}
+	SDE_ATRACE_END("sde_encoder_resource_control");
+
 }

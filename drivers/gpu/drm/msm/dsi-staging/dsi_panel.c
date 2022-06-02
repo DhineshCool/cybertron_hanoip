@@ -987,7 +987,7 @@ static int dsi_panel_send_param_cmd (struct dsi_panel *panel,
 
         param_map = panel_param->val_map;
 
-	pr_info("%s: param_name=%s; val_max =%d, default_value=%d, value=%d\n",
+	pr_debug("%s: param_name=%s; val_max =%d, default_value=%d, value=%d\n",
 	        __func__, panel_param->param_name, panel_param->val_max,
 		panel_param->default_value, param_info->value);
 
@@ -998,7 +998,7 @@ static int dsi_panel_send_param_cmd (struct dsi_panel *panel,
 
 	if (panel_param->value == param_info->value)
 	{
-		pr_info("(mode=%d): requested value=%d is same. Do nothing\n",
+		pr_debug("(mode=%d): requested value=%d is same. Do nothing\n",
 			param_info->param_idx, param_info->value);
 		rc = 0;
 	} else {
@@ -1113,7 +1113,7 @@ static int dsi_panel_set_cabc(struct dsi_panel *panel,
 {
 	int rc = 0;
 
-	pr_info("%s: Set CABC to (%d)\n", __func__, param_info->value);
+	pr_debug("%s: Set CABC to (%d)\n", __func__, param_info->value);
 	rc = dsi_panel_send_param_cmd(panel, param_info);
 	if (rc < 0)
 		pr_err("%s: failed to send param cmds. ret=%d\n", __func__, rc);
@@ -1132,7 +1132,7 @@ static int dsi_panel_set_acl(struct dsi_panel *panel,
 {
 	int rc = 0;
 
-	pr_info("%s: Set ACL to (%d)\n", __func__, param_info->value);
+	pr_debug("%s: Set ACL to (%d)\n", __func__, param_info->value);
 	rc = dsi_panel_send_param_cmd(panel, param_info);
 	if (rc < 0)
 		pr_err("%s: failed to send param cmds. ret=%d\n", __func__, rc);

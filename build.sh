@@ -16,7 +16,7 @@ ZIP_DIR=$KERNEL_DIR/../anykernel3
 CONFIG=vendor/hanoip_defconfig
 CROSS_COMPILE="aarch64-linux-android-"
 CROSS_COMPILE_ARM32="arm-linux-androideabi-"
-PATH="${KERNEL_DIR}/../cl12/bin:${KERNEL_DIR}/../aarch64-linux-android-4.9/bin:${KERNEL_DIR}/../arm-linux-androideabi-4.9/bin:${PATH}"
+PATH="${KERNEL_DIR}/../cl11/bin:${KERNEL_DIR}/../aarch64-linux-android-4.9/bin:${KERNEL_DIR}/../arm-linux-androideabi-4.9/bin:${PATH}"
 
 # Export
 export LOCALVERSION=-Cybertron-v2
@@ -62,8 +62,14 @@ fi
 cd $ZIP_DIR
 make clean &>/dev/null
 make normal &>/dev/null
-rm -rf hanoip.zip
+rm -rf hanoip.zip hanoip-signed.zip zipsigner-3.0.jar
+
+echo -e "$yellow || Signing Zip || $white"
+
 zip -r9 hanoip.zip * -x .git README.md *placeholder
-echo "Flashable zip generated under $ZIP_DIR."
+curl -sLo zipsigner-3.0.jar https://github.com/Magisk-Modules-Repo/zipsigner/raw/master/bin/zipsigner-3.0-dexed.jar
+java -jar zipsigner-3.0.jar hanoip.zip hanoip-signed.zip
+
+echo -e "$gre || Flashable zip generated under $ZIP_DIR. ||"
 cd ..
 # Build end

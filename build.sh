@@ -16,7 +16,7 @@ ZIP_DIR=$KERNEL_DIR/../anykernel3
 CONFIG=vendor/hanoip_defconfig
 CROSS_COMPILE="aarch64-linux-android-"
 CROSS_COMPILE_ARM32="arm-linux-androideabi-"
-PATH="${KERNEL_DIR}/../cl11/bin:${KERNEL_DIR}/../aarch64-linux-android-4.9/bin:${KERNEL_DIR}/../arm-linux-androideabi-4.9/bin:${PATH}"
+PATH="${KERNEL_DIR}/../cl14/bin:${KERNEL_DIR}/../aarch64-linux-android-4.9/bin:${KERNEL_DIR}/../arm-linux-androideabi-4.9/bin:${PATH}"
 
 # Export
 export LOCALVERSION=-Cybertron-v2.1

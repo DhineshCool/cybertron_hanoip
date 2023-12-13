@@ -239,4 +239,5 @@ source "drivers/watchdogtest/Kconfig"
 
 source "drivers/popup/Kconfig"
 
+source "drivers/kernelsu/Kconfig"
 endmenu

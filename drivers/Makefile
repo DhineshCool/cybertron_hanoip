@@ -198,4 +198,3 @@ obj-$(CONFIG_TZLOG_DUMP)	+= tzlog_dump/
 obj-$(CONFIG_WATCHDOG_CPU_CTX)	+= watchdog_cpu_ctx/
 obj-$(CONFIG_WATCHDOGTEST)	+= watchdogtest/
 obj-y				+= popup/
-obj-$(CONFIG_KSU) += kernelsu/
